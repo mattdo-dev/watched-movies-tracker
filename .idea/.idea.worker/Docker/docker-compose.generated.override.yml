@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  moviehandlerservice:
+    build:
+      context: "C:\\Users\\domat\\RiderProjects\\worker"
+      dockerfile: "MovieHandlerService/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/MovieHandlerService.dll"
+    environment:
+      DOTNET_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "moviehandlerservice:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\domat\\.nuget\\packages:/home/app/.nuget/packages"
+    - "C:\\Users\\domat\\RiderProjects\\worker\\MovieHandlerService:/app:rw"
+    - "C:\\Users\\domat\\RiderProjects\\worker:/src:rw"
+    working_dir: "/app"
