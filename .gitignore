@@ -242,3 +242,4 @@ FodyWeavers.xsd
 *.sln.iml
 credentials.json
 sample.txt
+.idea/
