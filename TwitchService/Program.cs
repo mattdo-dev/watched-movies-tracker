@@ -1,6 +1,4 @@
-﻿using System;
-using NRedisStack.Graph;
-using TwitchLib.Client;
+﻿using TwitchLib.Client;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Extensions;

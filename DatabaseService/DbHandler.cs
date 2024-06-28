@@ -113,7 +113,7 @@ public static class DbHandler
             throw new DataException("Null value in date that should not exist...?");
         }
 
-        return (DateTime)result;
+        return (DateTime) result;
     }
 
     public static string? GetFirstMovies()

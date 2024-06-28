@@ -4,6 +4,11 @@ public class Trie
 {
     private readonly TrieNode _root = new();
 
+    public bool IsPopulated()
+    {
+        return _root != null;
+    }
+
     public void Insert(string title)
     {
         var normalizedTitle = title.ToLower();

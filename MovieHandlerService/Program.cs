@@ -1,5 +1,4 @@
 ﻿using DatabaseService;
-using DatabaseService.Utils;
 using MovieHandlerService.Handlers;
 using MovieHandlerService.Utils;
 

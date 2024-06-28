@@ -16,7 +16,7 @@ public static class RedisTrie
     {
         var normalizedTitle = NormalizeTitle.Normalize(title);
         var db = RedisHandler.Database;
-        var batch = db.CreateBatch();  // Create a batch for pipelined commands
+        var batch = db.CreateBatch();
 
         foreach (var start in Enumerable.Range(0, normalizedTitle.Length))
         {
@@ -27,12 +27,12 @@ public static class RedisTrie
                 batch.StringSetAsync(currentPrefix + ExistsHashField, 1);
             }
 
-            // Mark as terminating and add title at each node level asynchronously
+            // terminator + title suffix
             batch.StringSetAsync(currentPrefix + TerminatingKeySuffix, 1);
             batch.SetAddAsync(currentPrefix + TitleSetSuffix, title);
         }
 
-        batch.Execute();  // Execute all pipelined commands together
+        batch.Execute();
     }
 
     public static IEnumerable<string> Search(string query)
@@ -41,13 +41,12 @@ public static class RedisTrie
         var db = RedisHandler.Database;
         var currentPrefix = BuildKeyForQuery(query);
 
-        return !db.KeyExists(currentPrefix + ExistsHashField) ? // Check if prefix exists
+        return !db.KeyExists(currentPrefix + ExistsHashField) ?
             [] : CollectAllTitles(db, currentPrefix);
     }
 
     private static HashSet<string> CollectAllTitles(IDatabase db, string baseKey)
     {
-        // Directly pulling from terminating nodes' titles
         return [..db.SetMembers(baseKey + TitleSetSuffix).Select(v => (string)v!)];
     }
 
