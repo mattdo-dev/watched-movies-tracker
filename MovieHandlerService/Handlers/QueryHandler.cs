@@ -4,23 +4,15 @@ using MovieHandlerService.Utils;
 
 namespace MovieHandlerService.Handlers;
 
-public class QueryHandler
+public sealed class QueryHandler
 {
+    private readonly string[] _dateFormats = { "MM/dd/yyyy", "dd/MM/yyyy" };
     private readonly Trie _trie = new();
     private readonly SheetsHandler _sheets = new();
 
     public QueryHandler()
     {
-        // TODO: prepopulate data into memory and database.
-        var datesDDMMRange2022 =
-            _sheets.GetDataInRange("C2", "D123");
-        // DateTime.ParseExact M/d/y
-        var datesMMDDRange2022 =
-            _sheets.GetDataInRange("C124", "D522");
-        var datesMMDDRange2023 =
-            _sheets.GetDataInRange("C523", "D3361");
-        var datesMMDDRange2024 =
-            _sheets.GetDataInRange("C3362", "D4521"); // and more
+        PrepopulateData();
     }
 
     /// <summary>
@@ -29,7 +21,7 @@ public class QueryHandler
     /// </summary>
     /// <param name="query">The query to do a date lookup.</param>
     /// <returns>An array of either a date, a list of matches, or nothing.</returns>
-    public string[]? MovieNameFindLastWatchedDate(string query)
+    public string[] MovieNameFindLastWatchedDate(string query)
     {
         var matches = _trie.Search(query);
         var enumerable = matches as string[] ?? matches.ToArray();
@@ -38,16 +30,72 @@ public class QueryHandler
         switch (size)
         {
             case 1:
-                var lastWatchedDate = DbHandler.GetMovieLastWatchedDate(
-                    enumerable.First());
-
-                return [lastWatchedDate.ToString("dd MMMM, yyyy",
-                    CultureInfo.InvariantCulture)];
+                var lastWatchedDate = DbHandler.GetMovieLastWatchedDate(enumerable.First());
+                return [lastWatchedDate.ToString("dd MMMM, yyyy", CultureInfo.InvariantCulture)];
 
             case > 1:
                 return enumerable;
+
             case < 1:
-                return null;
+                return ["Could not find query"];
+        }
+    }
+
+    /// <summary>
+    /// Initialization method to prepopulate data on call.
+    /// </summary>
+    private void PrepopulateData()
+    {
+        var datesDdmmRange2022 = _sheets.GetDataInRange("C2", "D123");
+        var datesMmddRange2022 = _sheets.GetDataInRange("C124", "D522");
+        var datesMmddRange2023 = _sheets.GetDataInRange("C523", "D3361");
+        var datesMmddRange2024 = _sheets.GetDataInRange("C3362", "D4521");
+        // and more
+
+        InsertMovies(datesDdmmRange2022, 2022);
+        InsertMovies(datesMmddRange2022, 2022);
+        InsertMovies(datesMmddRange2023, 2023);
+        InsertMovies(datesMmddRange2024, 2024);
+    }
+
+    /// <summary>
+    /// Method that handles the different date formats in the spreadsheet,
+    /// and performs insertion of data into memory and database.
+    ///
+    /// The spreadsheet itself does not contain the year so sections were
+    /// manually drawn for this fact.
+    /// </summary>
+    /// <param name="dateRanges">The data collected from our spreadsheet.</param>
+    /// <param name="year">The year in which the section was watched.</param>
+    private void InsertMovies(IList<IList<object>> dateRanges, int year)
+    {
+        foreach (var row in dateRanges)
+        {
+            if (row.Count <= 1) continue;
+
+            var dateWatched = row[0].ToString()?.Trim() ?? string.Empty;
+
+            if (dateWatched == "skipped" || string.IsNullOrWhiteSpace(dateWatched)) continue;
+
+            var movieWatched = row[1].ToString()?.Trim();
+
+            dateWatched += $"/{year}";
+
+            if (string.IsNullOrWhiteSpace(movieWatched)) continue;
+
+            try
+            {
+                DateTime.TryParseExact(dateWatched, _dateFormats,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var parsedDate);
+                DbHandler.InsertWatchedMovie(movieWatched, parsedDate);
+                _trie.Insert(movieWatched);
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Error parsing date {dateWatched}: {ex.Message}");
+            }
         }
     }
 }

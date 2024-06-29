@@ -1,67 +1,50 @@
-﻿using DatabaseService;
-using MovieHandlerService.Handlers;
-using MovieHandlerService.Utils;
+﻿using MovieHandlerService.Handlers;
 
-var sheets = new SheetsHandler();
-
-// DateTime.ParseExact D/m/y
-var datesDDMMRange2022 = sheets.GetDataInRange("C2", "D123");
-// DateTime.ParseExact M/d/y
-var datesMMDDRange2022 = sheets.GetDataInRange("C124", "D522");
-var datesMMDDRange2023 = sheets.GetDataInRange("C523", "D3361");
-var datesMMDDRange2024 = sheets.GetDataInRange("C3362", "D4521"); // and more
-
-Console.WriteLine("starting program");
-var trie = new Trie();
-string? dateWatched = null;
-foreach (var row in datesMMDDRange2022)
+class Program
 {
-    if (row.Count <= 1) continue;
-
-    if (!string.IsNullOrWhiteSpace(row[0].ToString()))
+    static void Main()
     {
-        dateWatched = row[0].ToString().Trim();
+        // Initialize the QueryHandler which also prepopulates data
+        var queryHandler = new QueryHandler();
+
+        // Test 1: Normal case - searching for an exact movie title
+        Console.WriteLine("Test 1: Exact match");
+        var resultExact = queryHandler.MovieNameFindLastWatchedDate("batman");
+        PrintResults(resultExact);
+
+        // Test 2: Multiple matches - searching for a partial title
+        Console.WriteLine("\nTest 2: Partial match resulting in multiple titles");
+        var resultMultiple = queryHandler.MovieNameFindLastWatchedDate("batman");
+        PrintResults(resultMultiple);
+
+        // Test 3: No matches - searching for a non-existent title
+        Console.WriteLine("\nTest 3: No match");
+        var resultNone = queryHandler.MovieNameFindLastWatchedDate("loool");
+        PrintResults(resultNone);
+
+        // Additional Tests:
+        // Test 4: Edge Case - Case Insensitive Search
+        Console.WriteLine("\nTest 4: Case Insensitive Search");
+        var resultCaseInsensitive = queryHandler.MovieNameFindLastWatchedDate("batman");
+        PrintResults(resultCaseInsensitive);
+
+        // Test 5: Specific Date Format - Validating Date Formatting
+        Console.WriteLine("\nTest 5: Specific Date Format Validation");
+        var resultDateValidation = queryHandler.MovieNameFindLastWatchedDate("batman");
+        PrintResults(resultDateValidation);
     }
 
-    if (dateWatched == "skipped") continue;
-
-    var movieWatched = row[1].ToString()?.Trim();
-
-    if (string.IsNullOrWhiteSpace(movieWatched))
+    private static void PrintResults(string[] results)
     {
-        continue;
-    }
+        if (results.Length == 0)
+        {
+            Console.WriteLine("No results found.");
+            return;
+        }
 
-    string realDate;
-    string[] numDate = dateWatched.Split('/');
-    if (Int32.Parse(numDate[1]) < 6)
-    {
-        realDate = numDate[0] + "/" + numDate[1] + "/24";
+        foreach (var result in results)
+        {
+            Console.WriteLine(result);
+        }
     }
-    else
-    {
-        realDate = numDate[0] + "/" + numDate[1] + "/23";
-    }
-
-    // Console.WriteLine($"{dateWatched}, {movieWatched}");
-    var parsedDate = DateTime.Parse(realDate);
-    DbHandler.InsertWatchedMovie(movieWatched, parsedDate);
-    trie.Insert(movieWatched);
 }
-
-// var results = RedisTrie.Search("day");
-// foreach (var title in results)
-// {
-//     Console.WriteLine(title);
-// }
-
-var e = trie.Search("batman");
-
-foreach (var va in e)
-{
-    Console.WriteLine(va);
-}
-
-Console.WriteLine(DbHandler.GetMovieLastWatchedDate("batman and superman: battle of the super sons"));
-
-Console.WriteLine("end of program");

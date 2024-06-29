@@ -40,6 +40,8 @@
     depends_on:
       - postgresdb
       - redis
+    env_file:
+      - ".env"
 
   tests:
     image: tests
