@@ -103,6 +103,8 @@ public static class DbHandler
 
         using var conn = new NpgsqlConnection(Connection.ConnectionString);
         conn.Open();
+        // TODO: bug with the redis search algo and the text inputted here.
+        normalizedTitle = normalizedTitle.ToLower();
         using var cmd = new NpgsqlCommand(searchQuery, conn);
         cmd.Parameters.AddWithValue("@short", normalizedTitle);
 

@@ -24,6 +24,7 @@ public sealed class QueryHandler
     public string[] MovieNameFindLastWatchedDate(string query)
     {
         var matches = _trie.Search(query);
+        Console.WriteLine($"--{matches.First()}--");
         var enumerable = matches as string[] ?? matches.ToArray();
         var size = enumerable.Length;
 

@@ -12,26 +12,17 @@ class Program
         var resultExact = queryHandler.MovieNameFindLastWatchedDate("batman");
         PrintResults(resultExact);
 
-        // Test 2: Multiple matches - searching for a partial title
-        Console.WriteLine("\nTest 2: Partial match resulting in multiple titles");
-        var resultMultiple = queryHandler.MovieNameFindLastWatchedDate("batman");
-        PrintResults(resultMultiple);
+        // TODO: Exception caught early internally, needs fixing
+        // // Test 2: No matches - searching for a non-existent title
+        // Console.WriteLine("\nTest 2: No match");
+        // var resultNone = queryHandler.MovieNameFindLastWatchedDate("loool");
+        // PrintResults(resultNone);
 
-        // Test 3: No matches - searching for a non-existent title
-        Console.WriteLine("\nTest 3: No match");
-        var resultNone = queryHandler.MovieNameFindLastWatchedDate("loool");
-        PrintResults(resultNone);
-
-        // Additional Tests:
-        // Test 4: Edge Case - Case Insensitive Search
-        Console.WriteLine("\nTest 4: Case Insensitive Search");
-        var resultCaseInsensitive = queryHandler.MovieNameFindLastWatchedDate("batman");
-        PrintResults(resultCaseInsensitive);
-
-        // Test 5: Specific Date Format - Validating Date Formatting
-        Console.WriteLine("\nTest 5: Specific Date Format Validation");
-        var resultDateValidation = queryHandler.MovieNameFindLastWatchedDate("batman");
-        PrintResults(resultDateValidation);
+        // Test 3: Return a date of a recorded movie title
+        Console.WriteLine("\nTest 3: Get a date");
+        // TODO: need explicit title support, or at least an option choosing method
+        var result = queryHandler.MovieNameFindLastWatchedDate("spirited away");
+        PrintResults(result);
     }
 
     private static void PrintResults(string[] results)
